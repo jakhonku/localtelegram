@@ -4,6 +4,7 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import socketio
 import uvicorn
@@ -27,24 +28,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
+app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
+
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
 
 class RegisterModel(BaseModel):
     first_name: str
     last_name: str
-    ip_address: str
+    ip_address: str = ""
 
 @app.post("/register")
-async def register(auth: RegisterModel):
-    existing = execute_query("SELECT * FROM users WHERE ip_address = ?", (auth.ip_address,), fetch=True)
+async def register(auth: RegisterModel, request: Request):
+    client_ip = request.client.host
+    existing = execute_query("SELECT * FROM users WHERE ip_address = ?", (client_ip,), fetch=True)
     if existing:
         execute_query("UPDATE users SET first_name=?, last_name=? WHERE ip_address=?", 
-                      (auth.first_name, auth.last_name, auth.ip_address))
+                      (auth.first_name, auth.last_name, client_ip))
     else:
         execute_query("INSERT INTO users (first_name, last_name, ip_address) VALUES (?, ?, ?)", 
-                      (auth.first_name, auth.last_name, auth.ip_address))
-    return {"status": "success", "ip": auth.ip_address}
+                      (auth.first_name, auth.last_name, client_ip))
+    return {"status": "success", "ip": client_ip}
 
 @app.get("/login")
 async def login(ip: str):

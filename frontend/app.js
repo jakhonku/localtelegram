@@ -49,33 +49,34 @@ const configuration = {
 
 // Auth 
 loginBtn.addEventListener("click", async () => {
-    const serverIp = serverIpInput.value.trim();
-    const myIp = myIpInput.value.trim();
     const firstName = firstNameInput.value.trim();
     const lastName = lastNameInput.value.trim();
 
-    if (!serverIp || !myIp || !firstName || !lastName) {
-        showAuthError("Barcha maydonlarni to'ldiring!");
+    if (!firstName || !lastName) {
+        showAuthError("Ism va familiyani kiriting!");
         return;
     }
 
-    serverBaseUrl = serverIp.startsWith("http") ? serverIp : `http://${serverIp}`;
+    serverBaseUrl = window.location.origin;
+    if (serverBaseUrl.startsWith("file://")) {
+        serverBaseUrl = "http://127.0.0.1:8000";
+    }
     
     try {
         const res = await fetch(`${serverBaseUrl}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ first_name: firstName, last_name: lastName, ip_address: myIp })
+            body: JSON.stringify({ first_name: firstName, last_name: lastName })
         });
         
         const data = await res.json();
         if (res.ok) {
-            currentIp = myIp;
+            currentIp = data.ip; // Serverdan qaytgan haqiqiy IP
             initSocket();
             
             myName.textContent = `${firstName} ${lastName}`;
             myAvatar.textContent = firstName.charAt(0);
-            myIpDisplay.textContent = myIp;
+            myIpDisplay.textContent = currentIp;
 
             authModal.classList.add("hidden");
             appContainer.classList.remove("hidden");
