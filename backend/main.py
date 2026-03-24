@@ -58,6 +58,12 @@ async def register(auth: RegisterModel, request: Request):
                       (auth.first_name, auth.last_name, client_ip))
     return {"status": "success", "ip": client_ip}
 
+@app.post("/logout")
+async def logout(request: Request):
+    client_ip = request.client.host
+    execute_query("DELETE FROM users WHERE ip_address=?", (client_ip,))
+    return {"status": "success"}
+
 @app.get("/login")
 async def login(ip: str):
     user = execute_query("SELECT * FROM users WHERE ip_address = ?", (ip,), fetch=True)

@@ -542,3 +542,14 @@ function endCallLocal() {
     document.getElementById("activeCallUI").classList.add("hidden");
     document.getElementById("remoteAudio").srcObject = null;
 }
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    if(confirm("Haqiqatan ham hisobdan chiqmoqchimisiz?")) {
+        try {
+            await fetch(`${serverBaseUrl}/logout`, {method: "POST"});
+        } catch(e) {}
+        localStorage.clear();
+        location.reload();
+    }
+});
