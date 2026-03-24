@@ -1,0 +1,18 @@
+# Data and Uploads
+backend/messenger.db
+backend/uploads/
+backend/__pycache__/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+dist/
+build/
+*.spec
+*.egg-info/
+
+# Temp tools log files
+python_paths.txt
+python_paths_utf8.txt
