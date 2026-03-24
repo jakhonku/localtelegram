@@ -28,8 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
-app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
+
 
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
@@ -200,6 +199,9 @@ async def end_call(sid, data):
     if receiver in user_sids:
         for r_sid in user_sids[receiver]:
             await sio.emit("call_ended", {}, to=r_sid)
+
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
+app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
 if __name__ == "__main__":
     def get_local_ip():
