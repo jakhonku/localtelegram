@@ -47,7 +47,19 @@ const configuration = {
     ]
 };
 
-// Auth 
+// Auto-login from local storage
+window.addEventListener("DOMContentLoaded", () => {
+    const savedFirstName = localStorage.getItem("firstName");
+    const savedLastName = localStorage.getItem("lastName");
+    if (savedFirstName && savedLastName) {
+        firstNameInput.value = savedFirstName;
+        lastNameInput.value = savedLastName;
+        // Kuting, avtomatik click bajariladi
+        loginBtn.click();
+    }
+});
+
+// Auth
 loginBtn.addEventListener("click", async () => {
     const firstName = firstNameInput.value.trim();
     const lastName = lastNameInput.value.trim();
@@ -72,6 +84,11 @@ loginBtn.addEventListener("click", async () => {
         const data = await res.json();
         if (res.ok) {
             currentIp = data.ip; // Serverdan qaytgan haqiqiy IP
+            
+            // Saqlash (brauzer yopilganda so'ramasligi uchun)
+            localStorage.setItem("firstName", firstName);
+            localStorage.setItem("lastName", lastName);
+
             initSocket();
             
             myName.textContent = `${firstName} ${lastName}`;
