@@ -47,14 +47,29 @@ const configuration = {
     ]
 };
 
-// Auto-login from local storage
-window.addEventListener("DOMContentLoaded", () => {
+// Auto-login from database IP or local storage
+window.addEventListener("DOMContentLoaded", async () => {
+    let base = window.location.origin;
+    if (base.startsWith("file://")) base = "http://127.0.0.1:8000";
+
+    try {
+        const res = await fetch(`${base}/me`);
+        const data = await res.json();
+        if (data.status === "success") {
+            firstNameInput.value = data.user.first_name;
+            lastNameInput.value = data.user.last_name;
+            loginBtn.click();
+            return;
+        }
+    } catch(err) {
+        console.log("No registered IP found");
+    }
+
     const savedFirstName = localStorage.getItem("firstName");
     const savedLastName = localStorage.getItem("lastName");
     if (savedFirstName && savedLastName) {
         firstNameInput.value = savedFirstName;
         lastNameInput.value = savedLastName;
-        // Kuting, avtomatik click bajariladi
         loginBtn.click();
     }
 });

@@ -38,6 +38,14 @@ class RegisterModel(BaseModel):
     last_name: str
     ip_address: str = ""
 
+@app.get("/me")
+async def get_me(request: Request):
+    client_ip = request.client.host
+    user = execute_query("SELECT * FROM users WHERE ip_address = ?", (client_ip,), fetch=True)
+    if user:
+        return {"status": "success", "user": user}
+    return {"status": "not_found"}
+
 @app.post("/register")
 async def register(auth: RegisterModel, request: Request):
     client_ip = request.client.host
